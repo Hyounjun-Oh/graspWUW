@@ -1,0 +1,70 @@
+<mxfile host="65bd71144e">
+    <diagram id="itwEEHI4764aP0672Tki" name="Page-1">
+        <mxGraphModel dx="2725" dy="1333" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="2" value="CLIP + manipulator task" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=35;fontStyle=1;spacing=3;" vertex="1" parent="1">
+                    <mxGeometry x="250" y="10" width="435" height="90" as="geometry"/>
+                </mxCell>
+                <mxCell id="30" value="" style="group" vertex="1" connectable="0" parent="1">
+                    <mxGeometry x="-10" y="130" width="940" height="390" as="geometry"/>
+                </mxCell>
+                <mxCell id="3" value="Semantic segmentation&amp;nbsp;" style="rounded=1;whiteSpace=wrap;html=1;fontSize=20;" vertex="1" parent="30">
+                    <mxGeometry x="190" y="200" width="150" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="4" value="Text" style="rounded=1;whiteSpace=wrap;html=1;fontSize=20;" vertex="1" parent="30">
+                    <mxGeometry x="20" y="80" width="150" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="5" value="CLIP" style="rounded=1;whiteSpace=wrap;html=1;fontSize=20;" vertex="1" parent="30">
+                    <mxGeometry x="540" y="90" width="150" height="170" as="geometry"/>
+                </mxCell>
+                <mxCell id="18" style="edgeStyle=none;html=1;entryX=0.002;entryY=0.825;entryDx=0;entryDy=0;entryPerimeter=0;fontSize=20;" edge="1" parent="30" source="3" target="5">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="17" style="edgeStyle=none;html=1;entryX=-0.009;entryY=0.119;entryDx=0;entryDy=0;entryPerimeter=0;fontSize=20;" edge="1" parent="30" source="4" target="5">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="9" style="edgeStyle=none;html=1;fontSize=20;" edge="1" parent="30" source="6" target="3">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="6" value="Image" style="rounded=1;whiteSpace=wrap;html=1;fontSize=20;" vertex="1" parent="30">
+                    <mxGeometry x="20" y="200" width="150" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="11" value="Text Encoder" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=20;rotation=0;" vertex="1" parent="30">
+                    <mxGeometry x="200" y="80" width="185" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="13" value="grasp pose estimation" style="rounded=1;whiteSpace=wrap;html=1;fontSize=20;" vertex="1" parent="30">
+                    <mxGeometry x="385" y="300" width="150" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="20" style="edgeStyle=none;html=1;exitX=1;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontSize=20;" edge="1" parent="30" source="3" target="13">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="19" value="Image Encoder" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=20;rotation=0;" vertex="1" parent="30">
+                    <mxGeometry x="340" y="200" width="185" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="23" value="Manipulator&lt;br&gt;grasp control" style="rounded=1;whiteSpace=wrap;html=1;fontSize=20;" vertex="1" parent="30">
+                    <mxGeometry x="760" y="90" width="150" height="260" as="geometry"/>
+                </mxCell>
+                <mxCell id="24" style="edgeStyle=none;html=1;entryX=-0.003;entryY=0.324;entryDx=0;entryDy=0;entryPerimeter=0;fontSize=20;" edge="1" parent="30" source="5" target="23">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="25" style="edgeStyle=none;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.75;entryDx=0;entryDy=0;fontSize=20;" edge="1" parent="30" source="13" target="23">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="27" value="Framework" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=35;" vertex="1" parent="30">
+                    <mxGeometry x="360" width="220" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="29" value="" style="rounded=1;whiteSpace=wrap;html=1;fontSize=35;labelBackgroundColor=none;fillColor=none;dashed=1;dashPattern=8 8;strokeWidth=3;strokeColor=#00FF00;" vertex="1" parent="30">
+                    <mxGeometry y="40" width="940" height="350" as="geometry"/>
+                </mxCell>
+                <mxCell id="31" value="&lt;h1 style=&quot;font-size: 26px;&quot;&gt;Object detection module&lt;/h1&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;[Input]&lt;/div&gt;&lt;div&gt;1. Image&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;1. YOLOv8x-seg -&amp;gt; single image inference&lt;/div&gt;&lt;div&gt;2. detected object class and bounding box -&amp;gt; Input as a CLIP image encoder&lt;/div&gt;&lt;div&gt;3. object's segment region{ x_min, y_min, x_max, y_max } for grasp pose estimation.&lt;/div&gt;" style="text;html=1;strokeColor=default;fillColor=none;spacing=5;spacingTop=-20;whiteSpace=wrap;overflow=hidden;rounded=0;labelBackgroundColor=none;strokeWidth=3;fontSize=26;verticalAlign=top;" vertex="1" parent="1">
+                    <mxGeometry x="-100" y="590" width="610" height="390" as="geometry"/>
+                </mxCell>
+                <mxCell id="32" value="&lt;h1 style=&quot;font-size: 26px;&quot;&gt;CLIP module&lt;/h1&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;[Input]&lt;/div&gt;&lt;div&gt;1. object's image.&amp;nbsp;&lt;/div&gt;&lt;div&gt;2. command text from user.&lt;/div&gt;" style="text;html=1;strokeColor=default;fillColor=none;spacing=5;spacingTop=-20;whiteSpace=wrap;overflow=hidden;rounded=0;labelBackgroundColor=none;strokeWidth=3;fontSize=26;" vertex="1" parent="1">
+                    <mxGeometry x="565" y="590" width="610" height="350" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
