@@ -37,5 +37,5 @@ YOLOv8에서 기본으로 제공하는 yolov8x-seg.pt 사전훈련 모델을 이
 
 ## Reference
 
-[1] CLIP, https://github.com/openai/CLIP
-[2] YOLOv8, https://github.com/ultralytics/ultralytics
+ 1. CLIP, https://github.com/openai/CLIP
+ 2. YOLOv8, https://github.com/ultralytics/ultralytics
