@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import signal
+import clip
 import sys
 import threading
 from ultralytics import YOLO
@@ -9,11 +10,13 @@ import numpy as np
 import cv2
 import queue
 from cv_bridge import CvBridge
+from PIL import Image as PILImage
 
 from std_msgs.msg import Int64
 from sensor_msgs.msg import Image
 
 YOLO_MODEDL_PATH = '/root/yolov8x-seg.pt' # COCO pretrained model for segmentation
+CLIP_MODEL = 'ViT-B/32'
 
 command_flag = False
 
@@ -21,6 +24,20 @@ command_flag = False
 # mode 1 : rosbag
 MODE = 1
 CROPPED_IMG_SIZE = (320,320)
+CLASS_INFO = {
+    0: 'person', 1: 'bicycle', 2: 'car', 3: 'motorcycle', 4: 'airplane', 5: 'bus', 6: 'train', 7: 'truck', 
+    8: 'boat', 9: 'traffic light', 10: 'fire hydrant', 11: 'stop sign', 12: 'parking meter', 13: 'bench', 
+    14: 'bird', 15: 'cat', 16: 'dog', 17: 'horse', 18: 'sheep', 19: 'cow', 20: 'elephant', 21: 'bear', 
+    22: 'zebra', 23: 'giraffe', 24: 'backpack', 25: 'umbrella', 26: 'handbag', 27: 'tie', 28: 'suitcase', 
+    29: 'frisbee', 30: 'skis', 31: 'snowboard', 32: 'sports ball', 33: 'kite', 34: 'baseball bat', 
+    35: 'baseball glove', 36: 'skateboard', 37: 'surfboard', 38: 'tennis racket', 39: 'bottle', 40: 'wine glass', 
+    41: 'cup', 42: 'fork', 43: 'knife', 44: 'spoon', 45: 'bowl', 46: 'banana', 47: 'apple', 48: 'sandwich', 
+    49: 'orange', 50: 'broccoli', 51: 'carrot', 52: 'hot dog', 53: 'pizza', 54: 'donut', 55: 'cake', 56: 'chair', 
+    57: 'couch', 58: 'potted plant', 59: 'bed', 60: 'dining table', 61: 'toilet', 62: 'tv', 63: 'laptop', 
+    64: 'mouse', 65: 'remote', 66: 'keyboard', 67: 'cell phone', 68: 'microwave', 69: 'oven', 70: 'toaster', 
+    71: 'sink', 72: 'refrigerator', 73: 'book', 74: 'clock', 75: 'vase', 76: 'scissors', 77: 'teddy bear', 
+    78: 'hair drier', 79: 'toothbrush'
+}
 
 rgb_queue = queue.Queue()
 depth_queue = queue.Queue()
@@ -35,8 +52,12 @@ class Core:
         self.depth_sub = rospy.Subscriber('/camera/aligned_depth_to_color/image_raw', Image, self.depth_callback)
         
         # Yolo model setting
-        self.model = YOLO(YOLO_MODEDL_PATH)
+        self.yolo_model = YOLO(YOLO_MODEDL_PATH)
         self.bridge = CvBridge()
+        
+        # CLIP model setting
+        self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        self.clip_model, self.preprocess = clip.load(CLIP_MODEL, self.device)
         
         # process threading
         self.process_thread = threading.Thread(target=self.run_process)
@@ -98,6 +119,16 @@ class Core:
                 self.process()
             
     def process(self):
+        def objectVisualization():
+                # Concatenate images horizontally (Visualization DEBUG)
+                if object_imgs.shape[0] > 0:
+                    concatenated_img = cv2.hconcat([img for img in object_imgs])
+                    cv2.imshow("Concatenated Image", concatenated_img)
+                cv2.waitKey(1)
+        def OpenCV2PIL(opencv_image):
+            color_coverted = cv2.cvtColor(opencv_image, cv2.COLOR_BGR2RGB)
+            pil_image = PILImage.fromarray(color_coverted)
+            return pil_image
         try:
             status = False
             # object info
@@ -105,6 +136,7 @@ class Core:
             object_cls = np.array([])
             object_seg = np.array([])
             object_imgs = np.empty((0, CROPPED_IMG_SIZE[0], CROPPED_IMG_SIZE[1], 3), dtype=np.uint8)
+            user_input = input("Enter a message: ")
             while(not status):
                 if MODE == 0:
                     data, status = self.syncImage()
@@ -117,7 +149,7 @@ class Core:
             rgb_image = self.bridge.imgmsg_to_cv2(data[0], 'bgr8')
             depth_image = self.bridge.imgmsg_to_cv2(data[1], '32FC1')
 
-            result = self.model.predict(source=rgb_image, show=True, show_conf=True, show_labels=True, show_boxes=True)
+            result = self.yolo_model.predict(source=rgb_image, show=True, show_conf=True, show_labels=True, show_boxes=True)
 
             # Save the object detection results
             for odr in result:
@@ -125,20 +157,36 @@ class Core:
                 object_bb = odr.boxes.xyxy.numpy().astype(np.int64)
                 object_seg = odr.masks.xy
 
-            # Crop the image for CLIP input
-            # right : +x, down : +y
-            for i in range(len(object_cls)):
+            obj_num = len(object_cls)
+            
+            for i in range(obj_num):
                 object_img = rgb_image[object_bb[i][1]:object_bb[i][3],object_bb[i][0]:object_bb[i][2]]
                 object_img = cv2.resize(object_img, dsize=CROPPED_IMG_SIZE, interpolation=cv2.INTER_LINEAR)
                 object_imgs = np.concatenate((object_imgs, [object_img]), axis=0)
+                
+            objectVisualization()
 
-            # Concatenate images horizontally (Visualization DEBUG)
-            if object_imgs.shape[0] > 0:
-                concatenated_img = cv2.hconcat([img for img in object_imgs])
-                cv2.imshow("Concatenated Image", concatenated_img)
-            
-            cv2.waitKey(1)
-            
+            # CLIP inference
+            user_text_input = clip.tokenize(user_input).to(self.device)
+            with torch.no_grad():
+                user_text_features = self.clip_model.encode_text(user_text_input)
+                user_text_features /= user_text_features.norm(dim=-1, keepdim=True)
+
+            highest_similarity = 0
+            most_similar_image_index = 0
+            for i in range(obj_num):
+                image = OpenCV2PIL(object_imgs[i])
+                image_input = self.preprocess(image).unsqueeze(0).to(self.device)
+                with torch.no_grad():
+                    image_features = self.clip_model.encode_image(image_input)
+                    image_features /= image_features.norm(dim=-1, keepdim=True)
+                    similarity = (image_features @ user_text_features.T).item()
+                    if similarity > highest_similarity:
+                        highest_similarity = similarity
+                        most_similar_image_index = i
+
+            print(f"Most similar image index: {most_similar_image_index}, similarity: {highest_similarity:.4f}")
+                                
         except Exception as e:
             rospy.logerr(f"Process STOP: {e}")   
             
