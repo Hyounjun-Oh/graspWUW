@@ -26,13 +26,13 @@ LAB 환경은 다음과 같습니다.
 ## YOLOv8을 이용한 Semantic Segmentation
 
 YOLOv8에서 기본으로 제공하는 yolov8x-seg.pt 사전훈련 모델을 이용해서 물체를 탐지했습니다. 만약 다른 물체 탐지를 원한다면 커스텀 데이터셋으로 학습 후 사용하면 됩니다.
-![YOLO object detection result](https://drive.google.com/file/d/1sTs89NnW1_lHh9LPAJAXqIfDcZ2lPweN/view?usp=drive_link)
+![YOLO object detection result](https://drive.google.com/uc?export=view&id=1sTs89NnW1_lHh9LPAJAXqIfDcZ2lPweN)
 
 ## CLIP을 이용한 사용자 코멘트와 물체간 유사도 비교
 
 유저로부터 받은 메세지를 text 인코딩 하고 검출한 객체의 개별 이미지를 image 인코딩 합니다. 두 벡터간 유사도를 비교하여 가장 유사한 워딩의 물체를 선별합니다.
-![Input image of CLIP model](https://drive.google.com/file/d/1icyAGEBMaWFt5L5eYijT6cBlnylDeEUR/view?usp=sharing)
-![Cosine similarity result](https://drive.google.com/file/d/1eS-y3ipvmz2ub8_OnYJQCJPrs7eWaCPm/view?usp=sharing)
+![Input image of CLIP model](https://drive.google.com/uc?export=view&id=1icyAGEBMaWFt5L5eYijT6cBlnylDeEUR)
+![Cosine similarity result](https://drive.google.com/uc?export=view&id=1eS-y3ipvmz2ub8_OnYJQCJPrs7eWaCPm)
 
 
 ## Reference
