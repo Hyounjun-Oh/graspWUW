@@ -1,10 +1,12 @@
-# GraspUwant
+# GraspWUW
 
  
 
  본 프로젝트는 AIRobotics LAB 환경에서 진행되었습니다.
  테이블위에 배치된 물체를 인식하고 사용자의 코멘트에 맞는 물건을 선택합니다.
  선택한 물건을 Pick & Place 하면 테스크는 마무리 됩니다.
+
+ Project 네이밍은 Grasp What You Want (graspWUW)로 하였습니다.
 
 LAB 환경은 다음과 같습니다.
 
