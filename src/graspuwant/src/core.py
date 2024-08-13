@@ -39,6 +39,13 @@ CLASS_INFO = {
     78: 'hair drier', 79: 'toothbrush'
 }
 
+# 1280 * 720 pinhole
+CAMERA_INTRINSIC = [635.5997366807397,635.1073315378363,633.9239491636653,369.02950972096005] # fx, fx, cx, cy
+CAMERA_DISTORTION = [-0.055731027995673074, 0.040781967334706, -0.00014895584848947406, 0.0003826882589985031] # k1, k2, p1, p2
+K = np.array([CAMERA_INTRINSIC[0],0,CAMERA_INTRINSIC[2]],
+             [0,CAMERA_INTRINSIC[1],CAMERA_INTRINSIC[3]],
+             [0,                  0,                  0])
+
 rgb_queue = queue.Queue()
 depth_queue = queue.Queue()
 command_queue = queue.Queue()
@@ -63,6 +70,7 @@ class Core:
         self.process_thread = threading.Thread(target=self.run_process)
         self.process_thread.daemon = True
         self.process_thread.start()
+        rospy.loginfo("CORE node initialization finished !")
     
     # callback function        
     def rgb_callback(self, msg):
@@ -75,7 +83,7 @@ class Core:
         
     def command_callback(self, msg):
         global command_flag
-        rospy.loginfo("Command callback called")
+        # rospy.loginfo("Command callback called")
         command_queue.put(msg)
         command_flag = True
         
@@ -117,7 +125,10 @@ class Core:
             if command_flag:
                 command_flag = False
                 self.process()
-            
+    
+    def getCameraPose(self):
+        pass
+    
     def process(self):
         def objectVisualization():
                 # Concatenate images horizontally (Visualization DEBUG)
@@ -145,10 +156,12 @@ class Core:
 
             if not status:
                 return
-            rospy.loginfo("process enter")
+            rospy.loginfo("YOLOv8 Semantic Segmentation Processing . . .")
             rgb_image = self.bridge.imgmsg_to_cv2(data[0], 'bgr8')
-            depth_image = self.bridge.imgmsg_to_cv2(data[1], '32FC1')
-
+            depth_image = self.bridge.imgmsg_to_cv2(data[1], '16UC1').astype('float32')
+            depth_image /= 65535.0
+            # print(np.min(depth_image), np.max(depth_image), np.mean(depth_image))
+            
             result = self.yolo_model.predict(source=rgb_image, show=True, show_conf=True, show_labels=True, show_boxes=True)
 
             # Save the object detection results
@@ -166,6 +179,7 @@ class Core:
                 
             objectVisualization()
 
+            rospy.loginfo("CLIP Inference Processing . . .")
             # CLIP inference
             user_text_input = clip.tokenize(user_input).to(self.device)
             with torch.no_grad():
@@ -173,7 +187,7 @@ class Core:
                 user_text_features /= user_text_features.norm(dim=-1, keepdim=True)
 
             highest_similarity = 0
-            most_similar_image_index = 0
+            obj_index = 0
             for i in range(obj_num):
                 image = OpenCV2PIL(object_imgs[i])
                 image_input = self.preprocess(image).unsqueeze(0).to(self.device)
@@ -183,9 +197,38 @@ class Core:
                     similarity = (image_features @ user_text_features.T).item()
                     if similarity > highest_similarity:
                         highest_similarity = similarity
-                        most_similar_image_index = i
+                        obj_index = i
 
-            print(f"Most similar image index: {most_similar_image_index}, similarity: {highest_similarity:.4f}")
+            print(f"Most similar image index: {obj_index}, similarity: {highest_similarity:.4f}")
+            
+            rospy.loginfo("Object Pose Processing. . .")
+            # Camera coordinate to robot base coordinate
+            # to determine the end-effector position
+            
+            # Object center point
+            center_x = int(object_bb[obj_index][0] + (object_bb[obj_index][2] - object_bb[obj_index][0]) / 2)
+            center_y = int(object_bb[obj_index][1] + (object_bb[obj_index][3] - object_bb[obj_index][1]) / 2)
+
+            # Object center depth
+            obj_center_area = depth_image[center_y-5:center_y+5, center_x-5:center_x+5]
+            obj_center_depth = np.max(obj_center_area)
+
+            print(f"object center depth is : {obj_center_depth*100:.4f} m")
+            
+            # Object pose in the Camera coordinate
+            camera_pose_w = self.getCameraPose()
+            obj_pose_c = np.linalg.inv(K) * np.array([center_x, center_y, 1]).T * obj_center_depth
+            
+            # Object pose in the Base coordinate
+            obj_pose_w
+            
+            # Send Approach command to manipulator(Moveit)
+            obj_pose_w service call
+            
+            # Decision grasping pose
+            
+            # Final Approach & Grasp -> Home pose
+            
                                 
         except Exception as e:
             rospy.logerr(f"Process STOP: {e}")   
