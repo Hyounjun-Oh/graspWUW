@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   sensor_msgs
   cv_bridge
+  dsr_msgs
 )
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -32,7 +33,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES graspuwant
-#  CATKIN_DEPENDS roscpp rospy std_msgs sensor_msgs cv_bridge
+#  CATKIN_DEPENDS roscpp rospy std_msgs sensor_msgs cv_bridge dsr_msgs
 #  DEPENDS system_lib
 )
 
